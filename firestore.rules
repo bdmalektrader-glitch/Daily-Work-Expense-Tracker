@@ -1,0 +1,164 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    match /users/{userId} {
+      allow get, write: if isOwner(userId) && isValidId(userId);
+
+      // Work Logs subcollection
+      match /workLogs/{workLogId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(workLogId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.date is string
+          && request.resource.data.status in ['full', 'half', 'holiday']
+          && request.resource.data.workdayEquivalent is number;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.status in ['full', 'half', 'holiday']
+          && request.resource.data.workdayEquivalent is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Expenses subcollection
+      match /expenses/{expenseId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(expenseId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.date is string
+          && request.resource.data.amount is number
+          && request.resource.data.amount >= 0;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.amount is number
+          && request.resource.data.amount >= 0;
+        allow delete: if isOwner(userId);
+      }
+
+      // Categories subcollection
+      match /categories/{categoryId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(categoryId)
+          && request.resource.data.userId == request.auth.uid;
+        allow delete: if isOwner(userId);
+      }
+
+      // Creditors subcollection
+      match /creditors/{creditorId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(creditorId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.originalDebtAmount is number
+          && request.resource.data.outstandingBalance is number;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.outstandingBalance is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Scheduled Payments subcollection
+      match /scheduledPayments/{paymentId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(paymentId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.scheduledAmount is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Repayment History subcollection
+      match /repaymentHistory/{repaymentId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(repaymentId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.actualAmountPaid is number
+          && request.resource.data.actualAmountPaid > 0;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid;
+        allow delete: if isOwner(userId);
+      }
+
+      // Notifications subcollection
+      match /notifications/{notificationId} {
+        allow get, list: if isOwner(userId);
+        allow create, update, delete: if isOwner(userId) && isValidId(notificationId)
+          && request.resource.data.userId == request.auth.uid;
+      }
+
+      // Incomes subcollection
+      match /incomes/{incomeId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(incomeId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.amount is number
+          && request.resource.data.amount >= 0;
+        allow delete: if isOwner(userId);
+      }
+
+      // Contacts (People Directory) subcollection
+      match /contacts/{contactId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(contactId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.name is string;
+        allow delete: if isOwner(userId);
+      }
+
+      // Borrowed Loans subcollection
+      match /borrowedLoans/{loanId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(loanId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.originalAmount is number
+          && request.resource.data.outstandingBalance is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Lent Loans subcollection
+      match /lentLoans/{loanId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(loanId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.originalAmount is number
+          && request.resource.data.outstandingReceivable is number;
+        allow delete: if isOwner(userId);
+      }
+
+      // Loan Transactions (Repayments made/received) subcollection
+      match /loanTransactions/{transactionId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(transactionId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0;
+        allow delete: if isOwner(userId);
+      }
+
+      // Profile subcollection
+      match /profile/{profileId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(profileId)
+          && request.resource.data.userId == request.auth.uid;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

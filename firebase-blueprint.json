@@ -1,0 +1,327 @@
+{
+  "entities": {
+    "workLog": {
+      "title": "Work Log",
+      "description": "Represents a single day's work record including status and notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "status": { "type": "string", "enum": ["full", "half", "holiday"] },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "workdayEquivalent": { "type": "number" },
+        "hasScreenshot": { "type": "boolean" },
+        "imageUrl": { "type": "string", "maxLength": 2048 },
+        "imagePath": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "date", "status", "workdayEquivalent"]
+    },
+    "expense": {
+      "title": "Expense",
+      "description": "Represents an individual financial expense recorded in BDT",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "categoryId": { "type": "string", "maxLength": 64 },
+        "categoryName": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "note": { "type": "string", "maxLength": 1000 },
+        "hasScreenshot": { "type": "boolean" },
+        "imageUrl": { "type": "string", "maxLength": 2048 },
+        "imagePath": { "type": "string", "maxLength": 512 },
+        "linkedRepaymentId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "date", "categoryId", "categoryName", "amount"]
+    },
+    "category": {
+      "title": "Category",
+      "description": "Custom or default category for grouping expenses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 64, "minLength": 1 },
+        "color": { "type": "string", "maxLength": 32 },
+        "icon": { "type": "string", "maxLength": 32 },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "name"]
+    },
+    "creditor": {
+      "title": "Creditor",
+      "description": "Represents a creditor or lender to whom debt is owed",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128, "minLength": 1 },
+        "contactNumber": { "type": "string", "maxLength": 64 },
+        "originalDebtAmount": { "type": "number" },
+        "outstandingBalance": { "type": "number" },
+        "repaymentAmount": { "type": "number" },
+        "nextPaymentDueDate": { "type": "string", "maxLength": 32 },
+        "paymentFrequency": { "type": "string", "enum": ["one-time", "weekly", "biweekly", "monthly"] },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "attachmentUrl": { "type": "string", "maxLength": 2048 },
+        "attachmentPath": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "name", "originalDebtAmount", "outstandingBalance", "repaymentAmount", "paymentFrequency", "priority"]
+    },
+    "scheduledPayment": {
+      "title": "Scheduled Payment",
+      "description": "Scheduled debt instalment or payment deadline for a creditor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "creditorId": { "type": "string", "maxLength": 128 },
+        "creditorName": { "type": "string", "maxLength": 128 },
+        "scheduledAmount": { "type": "number" },
+        "dueDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "status": { "type": "string", "enum": ["upcoming", "due_today", "overdue", "paid", "partially_paid"] },
+        "paidAmount": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "creditorId", "creditorName", "scheduledAmount", "dueDate", "status"]
+    },
+    "repaymentRecord": {
+      "title": "Repayment Record",
+      "description": "Historical log of actual debt payments made to creditors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "creditorId": { "type": "string", "maxLength": 128 },
+        "creditorName": { "type": "string", "maxLength": 128 },
+        "paymentId": { "type": "string", "maxLength": 128 },
+        "actualAmountPaid": { "type": "number" },
+        "actualPaymentDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "paymentMethod": { "type": "string", "maxLength": 64 },
+        "note": { "type": "string", "maxLength": 1000 },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "linkedExpenseId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "creditorId", "creditorName", "actualAmountPaid", "actualPaymentDate"]
+    },
+    "notification": {
+      "title": "Notification",
+      "description": "In-app reminder notification for upcoming or overdue payments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "paymentId": { "type": "string", "maxLength": 128 },
+        "creditorId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 255 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "type": { "type": "string", "enum": ["reminder_3days", "reminder_1day", "due_today", "overdue", "payment_completed"] },
+        "dueDate": { "type": "string", "maxLength": 32 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "title", "message", "type", "read"]
+    },
+    "userProfile": {
+      "title": "User Profile",
+      "description": "User preferences and profile metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 255 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "monthlyRepaymentBudget": { "type": "number" },
+        "browserNotificationsEnabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "email"]
+    },
+    "incomeRecord": {
+      "title": "Income Record",
+      "description": "Earned income received from individuals or organizations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "sourceCategory": { "type": "string", "enum": ["salary", "freelance", "business", "bonus", "other"] },
+        "receivedFrom": { "type": "string", "maxLength": 128 },
+        "contactId": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string", "maxLength": 64 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "referenceNumber": { "type": "string", "maxLength": 128 },
+        "hasScreenshot": { "type": "boolean" },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "date", "sourceCategory", "receivedFrom", "amount", "paymentMethod"]
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Person or organization involved in financial transactions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128, "minLength": 1 },
+        "phoneNumber": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["person", "company", "organization", "other"] },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "name", "type"]
+    },
+    "borrowedLoan": {
+      "title": "Borrowed Loan",
+      "description": "Money borrowed as a loan from a lender",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "contactId": { "type": "string", "maxLength": 128 },
+        "lenderName": { "type": "string", "maxLength": 128 },
+        "borrowedDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "originalAmount": { "type": "number" },
+        "amountRepaid": { "type": "number" },
+        "outstandingBalance": { "type": "number" },
+        "expectedRepaymentDate": { "type": "string", "maxLength": 32 },
+        "repaymentPlan": { "type": "string", "maxLength": 500 },
+        "interestOrCharges": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "hasScreenshot": { "type": "boolean" },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "status": { "type": "string", "enum": ["active", "repaid", "overdue"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "lenderName", "borrowedDate", "originalAmount", "outstandingBalance", "status"]
+    },
+    "lentLoan": {
+      "title": "Lent Loan",
+      "description": "Money lent to a borrower as an asset/receivable",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "contactId": { "type": "string", "maxLength": 128 },
+        "borrowerName": { "type": "string", "maxLength": 128 },
+        "lentDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "originalAmount": { "type": "number" },
+        "amountRepaidToMe": { "type": "number" },
+        "outstandingReceivable": { "type": "number" },
+        "expectedRepaymentDate": { "type": "string", "maxLength": 32 },
+        "repaymentPlan": { "type": "string", "maxLength": 500 },
+        "interestOrCharges": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "hasScreenshot": { "type": "boolean" },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "status": { "type": "string", "enum": ["active", "repaid", "overdue"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "borrowerName", "lentDate", "originalAmount", "outstandingReceivable", "status"]
+    },
+    "loanTransaction": {
+      "title": "Loan Transaction",
+      "description": "Repayment made on borrowed loan or repayment received from borrower",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "loanId": { "type": "string", "maxLength": 128 },
+        "loanType": { "type": "string", "enum": ["borrowed", "lent"] },
+        "contactId": { "type": "string", "maxLength": 128 },
+        "partyName": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "transactionDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "paymentMethod": { "type": "string", "maxLength": 64 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "hasScreenshot": { "type": "boolean" },
+        "screenshotUrl": { "type": "string", "maxLength": 2048 },
+        "screenshotPath": { "type": "string", "maxLength": 512 },
+        "linkedExpenseId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "loanId", "loanType", "partyName", "amount", "transactionDate", "paymentMethod"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/workLogs/{workLogId}": {
+      "schema": "workLog",
+      "description": "Daily work logs recorded by the user"
+    },
+    "/users/{userId}/expenses/{expenseId}": {
+      "schema": "expense",
+      "description": "Financial expenses recorded by the user"
+    },
+    "/users/{userId}/categories/{categoryId}": {
+      "schema": "category",
+      "description": "Expense categories customized by the user"
+    },
+    "/users/{userId}/creditors/{creditorId}": {
+      "schema": "creditor",
+      "description": "List of creditors and outstanding debt obligations"
+    },
+    "/users/{userId}/scheduledPayments/{paymentId}": {
+      "schema": "scheduledPayment",
+      "description": "Scheduled debt repayments and payment deadlines"
+    },
+    "/users/{userId}/repaymentHistory/{repaymentId}": {
+      "schema": "repaymentRecord",
+      "description": "Auditable log of completed repayments"
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": "notification",
+      "description": "Smart payment deadline alerts and notifications"
+    },
+    "/users/{userId}/profile/{profileId}": {
+      "schema": "userProfile",
+      "description": "Settings and profile for the authenticated user"
+    },
+    "/users/{userId}/incomes/{incomeId}": {
+      "schema": "incomeRecord",
+      "description": "Earned income transactions recorded by user"
+    },
+    "/users/{userId}/contacts/{contactId}": {
+      "schema": "contact",
+      "description": "People and organizations directory"
+    },
+    "/users/{userId}/borrowedLoans/{loanId}": {
+      "schema": "borrowedLoan",
+      "description": "Loans borrowed by the user"
+    },
+    "/users/{userId}/lentLoans/{loanId}": {
+      "schema": "lentLoan",
+      "description": "Loans lent out to borrowers"
+    },
+    "/users/{userId}/loanTransactions/{transactionId}": {
+      "schema": "loanTransaction",
+      "description": "Repayments made on borrowed debt or collected from borrowers"
+    }
+  }
+}

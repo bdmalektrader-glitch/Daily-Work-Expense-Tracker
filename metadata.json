@@ -1,0 +1,8 @@
+{
+  "name": "Daily Work & Expense Tracker",
+  "description": "Mobile-first PWA for daily work log tracking, expense management in BDT, receipts, calendar views, and financial reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
